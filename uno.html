@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+        @font-face {
+            font-family: Material Symbols Rounded;
+            font-style: normal;
+            font-weight: 100 700;
+            src: url('C:\\Users\\Caleb - School\\OneDrive\\Desktop\\Programming\\Extensions\\Boxel 3D Modded\\fonts\\Material-Symbols-Rounded.woff2') format("woff2")
+        }
+
+        @keyframes fade-in-out {
+            10% {
+                color: transparent;
+            }
+
+            100% {
+                color: initial
+            }
+        }
+
+        .msr {
+            font-family: Material Symbols Rounded;
+        }
+
+        * {
+            transition: 0.5s all;
+            font-family: Rubik;
+            user-select: none;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin-bottom: 0;
+            margin-top: 0;
+            overflow: hidden;
+        }
+
+        #game-rotator {
+            height: 100%;
+        }
+
+        .player-1 {
+            transform: rotate(0deg)
+        }
+
+        .player-2 {
+            transform: rotate(180deg)
+        }
+
+        .card-hand {
+            width: 100%;
+            display: flex;
+            height: fit-content;
+            /*flex-wrap: wrap-reverse;*/
+        }
+
+        .card-hand.player-1 {
+            align-items: end;
+        }
+
+        .card-hand.player-2 {
+            align-items: end;
+            transform: rotate(0deg);
+            /*pointer-events: none;*/
+        }
+
+        .card {
+            width: 112.5px;
+            height: 165px;
+            border: solid darkgray 4px;
+            border-radius: 0.3em;
+            background-color: black;
+            transition: 0.175s;
+            text-align: center;
+            font-size: 71px;
+            /* align-items: center; */
+            display: grid;
+            color: white;
+            z-index: 100;
+            user-select: none;
+        }
+
+        .card:not(.first) {
+            margin-left: -1.1em;
+        }
+
+        .card.red {
+            background-color: red;
+        }
+
+        .card.blue {
+            background-color: blue;
+        }
+
+        .card.green {
+            background-color: green;
+        }
+
+        .card.yellow {
+            background-color: yellow;
+        }
+
+        .nav-bar {
+            background-color: transparent;
+        }
+
+        .nav-bar.player-1 {
+            position: absolute;
+            bottom: 0em;
+            width: 100%;
+        }
+
+        .card-hand:hover:not(.hidden) .card:not(.first):not(.moving) {
+            margin-left: -10px;
+        }
+
+        .nav-bar .card-hand:not(.hidden) .card:hover:not(.moving) {
+            margin-bottom: 50px;
+        }
+
+        #discard .card:not(.card:nth-child(1)) {
+            margin-left: -1.6em;
+        }
+
+        span.num-small.top {
+            text-align: left;
+            font-size: 30px;
+            margin-left: 10%;
+        }
+
+        span.num-small.bottom {
+            text-align: left;
+            font-size: 30px;
+            margin-right: 10%;
+            transform: rotate(180deg);
+        }
+
+        #center {
+            position: absolute;
+            top: 35%;
+            left: 45%;
+            display: flex;
+        }
+
+        #discard {
+            /* position: absolute; */
+            /* top: 35%; */
+            /* left: 60vw; */
+            display: flex;
+            margin-left: 140px;
+        }
+
+        #deck {
+            position: absolute;
+            /* top: 35%; */
+            /* left: 50vw; */
+            display: flex;
+            cursor: pointer;
+            pointer-events: none;
+        }
+
+        #deck .card:not(#deck .card:nth-child(1)) {
+            margin-left: -120.5px;
+        }
+
+        #deck .card:nth-last-child(1) {
+            color: transparent;
+            background: url(https://www.unorules.com/http://unorules.com/wp-content/uploads/2011/11/uno-card-back.jpg) local no-repeat center white;
+            background-size: 126.5%;
+            background-position: 41.6% 40%;
+        }
+
+        #discard .card {
+            z-index: 0;
+        }
+
+        #deck .card {
+            z-index: 1;
+        }
+
+        .num-large,
+        .num-small {
+            pointer-events: none;
+            font-family: inherit;
+        }
+
+        .nav-bar .card-hand.hidden .card {
+            color: transparent;
+            pointer-events: none;
+            background: url(https://www.unorules.com/http://unorules.com/wp-content/uploads/2011/11/uno-card-back.jpg) fixed no-repeat center white;
+            background-size: 127%;
+            background-position: -12px -22px;
+        }
+
+        .name-tag {
+            width: fit-content;
+            font-size: 30px;
+            margin: 20px;
+        }
+
+        /*.card-hand:hover .card:not(.card-hand .card:nth-of-type(1)):not(.card-hand .card:nth-of-type(2)):not(.card-hand .card:nth-of-type(3)):not(.card-hand .card:nth-of-type(4)):not(.card-hand .card:nth-of-type(5)):not(.card-hand .card:nth-of-type(6)):not(.card-hand .card:nth-of-type(7)):not(.card-hand .card:nth-of-type(8)):not(.card-hand .card:nth-of-type(9)):not(.card-hand .card:nth-of-type(10)):not(.card-hand .card:nth-of-type(11)):not(.card-hand .card:nth-of-type(12)) {
+            margin-bottom: -50px;
+            z-index: 0;
+        }
+        .card-hand:hover:not(.hidden) .card:not(.first):not(.moving):nth-of-type(13) {
+            margin-left: 0px
+        }*/
+    </style>
+</head>
+
+<body>
+    <div id="turn-number" 
+        style="
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 25px;
+        "
+    >Turn 1</div>
+    <div id="center">
+        <div id="discard"></div>
+        <div id="deck"></div>
+    </div>
+
+    <div id="game-rotator">
+        <div class="nav-bar player-2">
+            <span class="player-2 name-tag"></span>
+            <div class="card-hand player-2 hidden AI"></div>
+        </div>
+        <div class="nav-bar player-1">
+            <span class="player-1 name-tag"></span>
+            <div class="card-hand player-1"></div>
+        </div>
+
+    </div>
+
+
+
+    <script src="uno.js"></script>
+    <!--<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script>
+        const peerID = Math.floor(Math.random()*900000)+100000,
+              peer = new Peer(peerID);
+        console.log(peerID)
+        var connection;
+        peer.on('connection', x=> {
+            x.on('data', data =>{
+                console.log(data);
+                switch(data.type) {
+                    case "update": {
+                        var deck_cards = data.deck_cards,
+                            disc_cards = data.disc_cards,
+                            player1_cards = data.player1_cards,
+                            player2_cards = data.player2_cards;
+                        for(let i in deck_cards) deck_cards[i] = new Card(deck_cards[i])
+                        for(let i in disc_cards) disc_cards[i] = new Card(disc_cards[i])
+                        for(let i in player1_cards) player1_cards[i] = new Card(player1_cards[i])
+                        for(let i in player2_cards) player2_cards[i] = new Card(player2_cards[i])
+
+                        deck.cards = deck_cards,
+                        deck.disc.cards = disc_cards,
+                        player1.hand.cards = player1_cards,
+                        player2.hand.cards = player2_cards;
+                        update()
+                    } break;
+                }
+            })
+            x.on('open', ()=>{
+                console.log('open called from peer', x.peer);
+                x.send('Hello there!')
+            })
+        })
+    </script>-->
+    <script>
+        localStorage.setItem('cards_drawn', 0);
+        localStorage.setItem('winner', 'false');
+
+        function checkWin() {
+            if (player1.hand.cards.length <= 0) {
+                alert(`Player 1 (${player1.name}), on a ${player1.last_play}!!!`)
+                clearInterval(checkWinInterval)
+                localStorage.setItem('winner', 'true');
+                Array.from(document.getElementsByClassName('card-hand')).forEach(e => { e.classList.add('hidden') })
+                return true
+            }
+            else if (player2.hand.cards.length <= 0) {
+                alert(`Player 2 (${player2.name}), on a ${player2.last_play}!!!`)
+                clearInterval(checkWinInterval)
+                localStorage.setItem('winner', 'true');
+                Array.from(document.getElementsByClassName('card-hand')).forEach(e => { e.classList.add('hidden') })
+                return true
+            }
+        }
+        function setup_next_turn() {
+            var player = document.getElementsByClassName('player-1 card-hand')[0].classList.contains('hidden') ? player2 : player1,
+                p_num = document.getElementsByClassName('player-1 card-hand')[0].classList.contains('hidden') ? 2 : 1
+            compatible_hand = false;
+            (player.hand.cards).forEach(e => {
+                deck.disc.verify(e) && (compatible_hand = true)//, console.log(e, deck.disc.cards[0]))
+            });
+            //console.log("--------------------------------------------")
+            document.getElementById('deck').style.pointerEvents = compatible_hand ? 'none' : 'all';
+            return compatible_hand ? true : false
+        }
+        function setCardClick() {
+            for (let i of document.getElementsByClassName('player-1 card-hand')[0].getElementsByClassName('card')) {
+
+                !i.hasListener && i.addEventListener('click', () => {
+                    var discard = document.getElementById('discard'),
+                        hand = document.getElementsByClassName('player-1 card-hand')[0],
+                        player = player1,
+                        index = Array.from(i.parentElement.getElementsByClassName('card')).indexOf(i);
+
+                    player.last_play = player.hand.cards[index].toString();
+                    var check = deck.disc.discard(player, player.hand.cards[index]);
+
+
+                    if (check) {
+                        i.style.position = 'absolute',
+                            i.style.marginLeft = "663px",
+                            i.style.marginBottom = '248px';
+
+                        setTimeout(() => {
+                            discard.innerHTML += i.outerHTML;
+                            discard.getElementsByClassName('card')[discard.getElementsByClassName('card').length - 1].style = '';
+                            update()
+                            setFirst()
+                            rotate_game()
+                            !["x2", "skip", "reverse"].includes(deck.disc.cards[0].number) && setTimeout(() => player2.AI(), 1250)
+                        }, 250)
+                    }
+                }),
+                    i.hasListener = true
+            }
+            for (let i of document.getElementsByClassName('player-2 card-hand')[0].getElementsByClassName('card')) {
+
+                !i.hasListener && i.addEventListener('click', () => {
+                    var discard = document.getElementById('discard'),
+                        hand = document.getElementsByClassName('player-2 card-hand')[0],
+                        player = player2,
+                        index = Array.from(i.parentElement.getElementsByClassName('card')).indexOf(i);
+
+                    player.last_play = player.hand.cards[index].toString();
+                    var check = deck.disc.discard(player, player.hand.cards[index]);
+
+                    if (check) {
+                        i.style.position = 'absolute',
+                            i.style.marginLeft = "663px",
+                            i.style.marginBottom = '248px';
+
+                        setTimeout(() => {
+                            discard.innerHTML += i.outerHTML;
+                            discard.getElementsByClassName('card')[discard.getElementsByClassName('card').length - 1].style = '';
+                            update()
+                            setFirst()
+                            rotate_game()
+                        }, 250)
+                    }
+                }),
+                    i.hasListener = true
+            }
+        }
+        function setHand(player, number) {
+            for (let card of player.hand.cards) {
+                document.getElementsByClassName(`player-${number} card-hand`)[0].innerHTML += card.toHTML()
+            }
+        }
+        function rotate_game() {
+            update()
+            localStorage.cards_drawn = 0;
+            var el = document.getElementById('game-rotator'),
+                hand1 = document.getElementsByClassName('card-hand player-1')[0],
+                hand2 = document.getElementsByClassName('card-hand player-2')[0];
+            rotate = el.style.transform == "rotate(180deg)" ? 0 : 180,
+                handHidden = el.style.transform == "rotate(180deg)" ? 2 : 1,
+                handActive = el.style.transform == "rotate(180deg)" ? 1 : 2,
+                //to be hidden
+                handHidden = document.getElementsByClassName('player-' + handHidden + ' card-hand')[0],
+                //to be active
+                handActive = document.getElementsByClassName('player-' + handActive + ' card-hand')[0];
+
+            for (let i of document.getElementsByClassName('card')) {
+                i.classList.add('moving')
+            }
+
+            hand1.style.paddingLeft = '500px',
+                hand2.style.paddingLeft = '500px',
+                hand1.style.paddingBottom = '50px',
+                hand2.style.paddingBottom = '50px',
+                hand1.style.width = 'fit-content',
+                hand2.style.width = 'fit-content',
+                document.getElementsByClassName('name-tag')[0].style.animation = 'fade-in-out 5s'
+            document.getElementsByClassName('name-tag')[1].style.animation = 'fade-in-out 5s'
+
+
+            setTimeout(() => el.style.transform = `rotate(${rotate}deg)`, 250),
+
+                setTimeout(() => {
+                    !handActive.classList.contains('AI') && handActive.classList.remove('hidden')
+                    handHidden.classList.add('hidden')
+                    hand1.style.paddingLeft = '',
+                        hand2.style.paddingLeft = '',
+                        hand1.style.paddingBottom = '',
+                        hand2.style.paddingBottom = '',
+                        hand1.style.width = '',
+                        hand2.style.width = '',
+                        document.getElementsByClassName('name-tag')[0].style.animation = ''
+                    document.getElementsByClassName('name-tag')[1].style.animation = ''
+                }, 500)
+            setTimeout(() => { for (let i of document.getElementsByClassName('card')) { i.classList.remove('moving') } }, 750)
+        }
+        function setDeckClick() {
+            function a() {
+                var player = document.getElementsByClassName('hidden')[0].classList.contains('player-2') ? player1 : player2,
+                    p_num = document.getElementsByClassName('hidden')[0].classList.contains('player-2') ? 1 : 2;
+                deck.draw(player.hand)
+                localStorage.cards_drawn = parseInt(localStorage.cards_drawn) + 1
+
+                var compatible_hand = false;
+                player.hand.cards.forEach(e => {
+                    deck.disc.verify(e) && (compatible_hand = true)
+                })
+
+                if (localStorage.cards_drawn == 3 && !compatible_hand) {
+                    p_num == 1 && setTimeout(() => player2.AI(), 1250)
+                    rotate_game()
+                }
+
+                //To prevent new card from being at the beginning of hand
+                player.hand.cards.push(player.hand.cards[0])
+                player.hand.cards.splice(0, 1)
+                //console.log("player == player1 ? 1 : 2", player == player1 ? 1 : 2)
+                setup_next_turn(player == player1 ? 1 : 2, true)
+                update()
+            }
+            var cards = Array.from(document.getElementById('deck').getElementsByClassName('card'));
+            cards.forEach(e => {
+                if (!e.hasDeckEventListener) {
+                    e.addEventListener('click', a)
+                    e.hasDeckEventListener = true
+                }
+            })
+        }
+        function deckCheck() {
+            if (deck.cards.length === 0) {
+                deck.cards = deck.disc.cards.splice(1, 1000/*all*/);
+                deck.shuffle()
+                update()
+            }
+        }
+        setInterval(setDeckClick, 100)
+        setInterval(setCardClick, 100)
+        setInterval(deckCheck, 100)
+        setInterval(() => {
+            for (let e of Array.from(document.getElementsByClassName('player-1 card-hand')[0].getElementsByClassName('card'))) {
+                var count = document.getElementsByClassName('player-1 card-hand')[0].getElementsByClassName('card').length,
+                    width = window.innerWidth / count,// * 1.1,
+                    height = width * 1.46666667,
+                    fontLarge = width / 1.58450704,
+                    fontSmall = width / 3.75;
+                if (count > 12) {
+                    e.style.width = width + "px",
+                        e.style.height = height + "px",
+                        e.style.fontSize = fontLarge + "px",
+                        e.getElementsByClassName('num-small')[0].style.fontSize = fontSmall + "px",
+                        e.getElementsByClassName('num-small')[1].style.fontSize = fontSmall + "px"
+                }
+            }
+            for (let e of Array.from(document.getElementsByClassName('player-2 card-hand')[0].getElementsByClassName('card'))) {
+                var count = document.getElementsByClassName('player-2 card-hand')[0].getElementsByClassName('card').length,
+                    width = window.innerWidth / count,// * 1.1,
+                    height = width * 1.46666667,
+                    fontLarge = width / 1.58450704,
+                    fontSmall = width / 3.75;
+                if (count > 12) {
+                    e.style.width = width + "px",
+                        e.style.height = height + "px",
+                        e.style.fontSize = fontLarge + "px",
+                        e.getElementsByClassName('num-small')[0].style.fontSize = fontSmall + "px",
+                        e.getElementsByClassName('num-small')[1].style.fontSize = fontSmall + "px"
+                }
+            }
+        }, 100)
+        var checkWinInterval = setInterval(checkWin, 100)
+        setInterval(setup_next_turn, 100)
+        //setInterval(update, 100) //makes it jittery due to reset
+    </script>
+</body>
+
+</html>
